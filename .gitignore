@@ -1,0 +1,16 @@
+node_modules/
+
+.env
+.env.local
+
+
+dist/
+.next/
+out/
+
+
+.vscode/
+.idea/
+
+
+*.log
