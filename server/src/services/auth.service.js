@@ -21,7 +21,7 @@ return {token, hashedToken};
 }
 
 const saveResetToken = async(email) =>{
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
   if (!user) return null;
 
   const { token, hashedToken } = generateResetToken();
