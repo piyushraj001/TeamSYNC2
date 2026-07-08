@@ -1,3 +1,5 @@
+const transporter = require("../services/email.service");
+
 const crypto = require("crypto");
 const {
   hashPassword,
@@ -9,6 +11,7 @@ const {
 const { validatePassword } = require("../lib/validationPassword");
 const { prisma } = require("../lib/prisma");
 const { saveResetToken } = require("../services/auth.service");
+
 
 
 // REGISTER
@@ -107,13 +110,21 @@ exports.forgotPassword = async (req, res, next) => {
       return res.status(400).json({ error: "Email required" })
     }
 
-    const token = await saveResetToken(email);
+    const token = await saveResetToken(email.toLowerCase());
 
-    if (token) {
-      console.log(`Reset TOKEN ${email}:`, token);
+    if (!token) {
+      return res.json({ message: "If email exists, reset link sent." })
     }
+    const resetLink = `${process.env.FRONTEND_URL}/auth/reset-password?token=${token}`;
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email.toLowerCase(),
+      subject: "Password Reset Request",
+      text: `Click the link to reset your password:\n\n${resetLink}`
+    });
+    console.log(`Reset link sent to ${email.toLowerCase()}`);
+    res.json({ message: "If email exists, reset Link sent." })
 
-    res.json({ message: "If email exists, reset link sent " });
   } catch (error) {
     next(error);
   }
