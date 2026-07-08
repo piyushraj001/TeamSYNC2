@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "insight-ai": "^1.0.8"
+    "nodemailer": "^9.0.3"
   }
 }
