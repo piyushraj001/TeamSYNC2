@@ -11,7 +11,7 @@ exports.createWorkspace = async (req, res, next) => {
       return res.status(400).json({ error: "Workspace name must be between 2 and 50 characters" });
     }
 
-    // Generate a unique URL-safe 8-character invite code
+    // Generate a unique URL-safe invite code
     const inviteCode = crypto.randomBytes(4).toString("hex");
 
     // Perform database operations in a strict transaction
