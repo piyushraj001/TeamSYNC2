@@ -14,7 +14,7 @@ const ForgotPasswordPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const success = await forgotPassword({ email });
+      const success = await forgotPassword(email);
       if (success) {
         setSubmitted(true);
         setEmail('');

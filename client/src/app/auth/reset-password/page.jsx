@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import Link from 'next/link';
@@ -135,4 +135,10 @@ const ResetPasswordPage = () => {
   );
 };
 
-export default ResetPasswordPage;
+export default function ResetPasswordPageWithSuspense() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50">Loading...</div>}>
+      <ResetPasswordPage />
+    </Suspense>
+  );
+}

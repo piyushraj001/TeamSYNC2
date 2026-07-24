@@ -19,7 +19,9 @@ app.use(express.json())
 
 // Routes
 const authRoutes = require("./routes/auth");
+const workspaceRoutes = require("./routes/workspace");
 app.use("/api/auth", authRoutes);
+app.use("/api/workspaces", workspaceRoutes);
 app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
 });
