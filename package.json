@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "lucide-react": "^1.32.0",
     "nodemailer": "^9.0.3"
   }
 }

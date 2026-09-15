@@ -1,5 +1,6 @@
 const {verifyAccessToken} = require("../lib/auth")
-const authenticate = (req,res,next) =>{
+
+const authenticate =async (req,res,next) =>{
     try{
         const authHeader = req.headers.authorization;
         

@@ -21,9 +21,9 @@ const generateAccessToken = (payload) =>{
     return jwt.sign(payload, JWT_SECRET, {expiresIn: "15m"})
 };
 
-const generateRefreshToken = (payload) =>{
+const generateRefreshToken = (payload) => {
     return jwt.sign(payload, JWT_REFRESH_SECRET, {
-        expiresIn: "7d"
+        expiresIn: "30d"  // Matches session.expiresAt in DB
     })
 }
 

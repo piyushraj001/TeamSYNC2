@@ -33,11 +33,57 @@ model User {
   sentDirectMessages     DirectMessage[]   @relation("SentDMs")
   receivedDirectMessages DirectMessage[]   @relation("ReceivedDMs")
   ownedWorkspaces        Workspace[]       @relation("WorkspaceOwner")
+  createdChannels        Channel[]         @relation("ChannelCreator")
+  sessions               Session[]
+  createdInvites         Invite[]  @relation("InviteCreator")
 }
 
 enum AuthProvider {
   EMAIL
   GOOGLE
+}
+
+// ============ SESSIONS ============
+model Session {
+  id               String   @id @default(uuid())
+  refreshTokenHash String   @unique
+  deviceInfo       String?  // e.g. "Chrome on macOS"
+  ipAddress        String?
+  createdAt        DateTime @default(now())
+  lastActiveAt     DateTime @default(now())
+  expiresAt        DateTime
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  @@index([userId])
+}
+
+// ============ INVITES ============
+enum InviteType {
+  LINK
+  EMAIL
+}
+
+model Invite {
+  id          String     @id @default(uuid())
+  token       String     @unique @default(uuid())
+  type        InviteType @default(LINK)
+  email       String?                        // Only for email-type invites
+  maxUses     Int?                            // null = unlimited
+  useCount    Int        @default(0)
+  expiresAt   DateTime?                       // null = never expires
+  revokedAt   DateTime?                       // null = active
+  createdAt   DateTime   @default(now())
+
+  // Relations
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId String
+  createdBy   User       @relation("InviteCreator", fields: [createdById], references: [id])
+  createdById String
+
+  @@index([workspaceId])
 }
 
 // ============ WORKSPACES ============
@@ -54,6 +100,7 @@ model Workspace {
   ownerId  String
   members  WorkspaceMember[]
   channels Channel[]
+  invites  Invite[]
 }
 
 model WorkspaceMember {
@@ -86,6 +133,8 @@ model Channel {
   // Relations
   workspace   Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   workspaceId String
+  createdBy   User?           @relation("ChannelCreator", fields: [createdById], references: [id])
+  createdById String?
   members     ChannelMember[]
   messages    Message[]
 
@@ -107,10 +156,12 @@ model ChannelMember {
 
 // ============ MESSAGES ============
 model Message {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isEdited  Boolean   @default(false)
+  editedAt  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   // Relations
   sender    User    @relation(fields: [senderId], references: [id], onDelete: Cascade)
@@ -120,13 +171,16 @@ model Message {
 }
 
 model DirectMessage {
-  id        String   @id @default(uuid())
-  content   String
-  createdAt DateTime @default(now())
+  id             String   @id @default(uuid())
+  content        String
+  conversationId String
+  createdAt      DateTime @default(now())
 
   // Relations
   sender     User   @relation("SentDMs", fields: [senderId], references: [id], onDelete: Cascade)
   senderId   String
   receiver   User   @relation("ReceivedDMs", fields: [receiverId], references: [id], onDelete: Cascade)
   receiverId String
+
+  @@index([conversationId])
 }

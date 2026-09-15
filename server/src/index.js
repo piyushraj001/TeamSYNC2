@@ -1,4 +1,5 @@
 
+const http = require("http");
 const express = require("express");
 const morgan = require("morgan");
 const helmet = require("helmet");
@@ -6,34 +7,42 @@ const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const server = http.createServer(app);
+const PORT = process.env.PORT || 5001;
 
-app.use(helmet({
-    contentSecurityPolicy: false  // Disable for API testing
-}));
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({
-    origin: process.env.CLIENT_URL || "*", credentials: true
+  origin: process.env.CLIENT_URL || "http://localhost:3000",
+  credentials: true,
 }));
-app.use(morgan("dev"))
-app.use(express.json())
+app.use(morgan("dev"));
+app.use(express.json());
 
 // Routes
 const authRoutes = require("./routes/auth");
 const workspaceRoutes = require("./routes/workspace");
+const channelRoutes = require("./routes/channel");
+const dmRoutes = require("./routes/dm");
+const inviteRoutes = require("./routes/invite");
+
 app.use("/api/auth", authRoutes);
 app.use("/api/workspaces", workspaceRoutes);
-app.get("/", (req, res) => {
-  res.send("Backend is running 🚀");
-});
+app.use("/api", channelRoutes);
+app.use("/api/dms", dmRoutes);
+app.use("/api/invites", inviteRoutes);  // GET /api/invites/:token + POST /api/invites/:token/accept
+
+app.get("/", (req, res) => res.send("TeamSYNC backend running 🚀"));
+app.get("/health", (req, res) => res.json({ status: "ok", timestamp: new Date().toISOString() }));
+
 // Error middleware
 const errorMiddleware = require("./middleware/error.middleware");
 app.use(errorMiddleware);
 
-app.get("/health", (req, res) => {
-    res.json({ status: "ok", timestamp: new Date().toISOString() })
-});
+// Socket.IO setup
+const initSocket = require("./socket");
+const io = initSocket(server);
+app.set("io", io);
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`)
+server.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
-

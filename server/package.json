@@ -23,7 +23,9 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
-    "prisma": "^5.22.0"
+    "nodemailer": "^10.0.10",
+    "prisma": "^5.22.0",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",

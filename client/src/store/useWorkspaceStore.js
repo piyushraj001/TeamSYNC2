@@ -45,11 +45,8 @@ export const useWorkspaceStore = create((set, get) => ({
     try {
       const res = await axiosInstance.post("/workspaces", data);
       toast.success(res.data.message || "Workspace created!");
-      
-      // Refresh workspace list
       const { fetchWorkspaces } = get();
       await fetchWorkspaces();
-      
       return res.data.workspace;
     } catch (err) {
       const errMsg = err.response?.data?.error || "Failed to create workspace";
@@ -65,11 +62,8 @@ export const useWorkspaceStore = create((set, get) => ({
     try {
       const res = await axiosInstance.post(`/workspaces/join/${inviteCode}`);
       toast.success(res.data.message || "Joined workspace successfully!");
-      
-      // Refresh workspace list
       const { fetchWorkspaces } = get();
       await fetchWorkspaces();
-      
       return res.data.workspace;
     } catch (err) {
       const errMsg = err.response?.data?.error || "Failed to join workspace";
@@ -80,7 +74,22 @@ export const useWorkspaceStore = create((set, get) => ({
     }
   },
 
+  leaveWorkspace: async (workspaceId) => {
+    try {
+      await axiosInstance.delete(`/workspaces/${workspaceId}/members/me`);
+      set((state) => ({
+        workspaces: state.workspaces.filter((w) => w.id !== workspaceId),
+        activeWorkspace: state.activeWorkspace?.id === workspaceId ? null : state.activeWorkspace,
+      }));
+      toast.success("Left workspace");
+      return true;
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Failed to leave workspace");
+      return false;
+    }
+  },
+
   setActiveWorkspace: (workspace) => {
     set({ activeWorkspace: workspace });
-  }
+  },
 }));
